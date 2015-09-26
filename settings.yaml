@@ -1,0 +1,5 @@
+font_path: fonts/arial10x10.png
+title: Min skit
+main_window:
+    width: 100
+    height: 50
