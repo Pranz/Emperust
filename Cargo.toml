@@ -4,5 +4,7 @@ version = "0.1.0"
 authors = ["Jesper Fridefors <jesper.fridefors@gmail.com>"]
 
 [dependencies]
-tcod = "*"
 yaml-rust = "*"
+
+[dependencies.tcod]
+git = "https://github.com/tomassedovic/tcod-rs"

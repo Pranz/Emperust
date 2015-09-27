@@ -8,10 +8,15 @@ use std::io;
 pub struct Settings {
     pub font_path: String,
     pub title: String,
-    pub width: i32,
-    pub height: i32,
+    pub main_window_width: i32,
+    pub main_window_height: i32,
+    pub map_window_width: usize,
+    pub map_window_height: usize,
     pub map_width: usize,
     pub map_height: usize,
+    pub height_map_coefficient: f32,
+    pub height_map_lacunarity: f32,
+    pub height_map_hurst: f32,
 }
 
 impl Settings {
@@ -26,10 +31,20 @@ impl Settings {
         Ok(Settings {
             font_path: doc["font_path"].as_str().unwrap().to_string(),
             title: doc["title"].as_str().unwrap().to_string(),
-            width: doc["main_window"]["width"].as_i64().unwrap() as i32,
-            height: doc["main_window"]["height"].as_i64().unwrap() as i32,
+            main_window_width: doc["main_window"]["width"]
+                .as_i64().unwrap() as i32,
+            main_window_height: doc["main_window"]["height"]
+                .as_i64().unwrap() as i32,
             map_width: doc["map"]["width"].as_i64().unwrap() as usize,
             map_height: doc["map"]["height"].as_i64().unwrap() as usize,
+            map_window_width: doc["map_window"]["width"].as_i64().unwrap() as usize,
+            map_window_height: doc["map_window"]["height"].as_i64().unwrap() as usize,
+            height_map_coefficient: doc["height_map"]["coefficient"]
+                .as_f64().unwrap() as f32,
+            height_map_lacunarity: doc["height_map"]["lacunarity"]
+                .as_f64().unwrap() as f32,
+            height_map_hurst: doc["height_map"]["hurst"]
+                .as_f64().unwrap() as f32,
         })
     }
 }

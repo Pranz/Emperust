@@ -20,14 +20,16 @@ use render::render_screen;
 
 fn main() {
     let settings = Settings::read("settings.yaml").unwrap();
-    let mut game = Game::new(&settings);
     
     let mut root = Root::initializer()
         .font(&settings.font_path, FontLayout::Tcod)
         .font_type(FontType::Greyscale)
-        .size(settings.width, settings.height)
-        .title(settings.title)
+        .size(settings.main_window_width, settings.main_window_height)
+        .title(&settings.title)
         .init();
+
+    
+    let mut game = Game::new(settings);
 
     tcod::system::set_fps(20);
 

@@ -2,7 +2,7 @@
 name = "emperust2"
 version = "0.1.0"
 dependencies = [
- "tcod 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tcod 0.7.0 (git+https://github.com/tomassedovic/tcod-rs)",
  "yaml-rust 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -21,6 +21,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "lazy_static"
+version = "0.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "libc"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -28,18 +33,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "tcod"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/tomassedovic/tcod-rs#8e6de5bb5700b940ab1128c32eacb5fd7cdf2ba9"
 dependencies = [
  "bitflags 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "tcod-sys 2.0.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tcod-sys 2.0.12 (git+https://github.com/tomassedovic/tcod-rs)",
  "time 0.1.32 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "tcod-sys"
 version = "2.0.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/tomassedovic/tcod-rs#8e6de5bb5700b940ab1128c32eacb5fd7cdf2ba9"
 dependencies = [
  "libc 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
