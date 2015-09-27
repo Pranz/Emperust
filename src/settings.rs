@@ -10,6 +10,8 @@ pub struct Settings {
     pub title: String,
     pub width: i32,
     pub height: i32,
+    pub map_width: usize,
+    pub map_height: usize,
 }
 
 impl Settings {
@@ -26,6 +28,8 @@ impl Settings {
             title: doc["title"].as_str().unwrap().to_string(),
             width: doc["main_window"]["width"].as_i64().unwrap() as i32,
             height: doc["main_window"]["height"].as_i64().unwrap() as i32,
+            map_width: doc["map"]["width"].as_i64().unwrap() as usize,
+            map_height: doc["map"]["height"].as_i64().unwrap() as usize,
         })
     }
 }
