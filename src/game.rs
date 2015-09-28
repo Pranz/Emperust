@@ -26,6 +26,8 @@ impl Game {
         Game {
             map: Map::new(settings.map_width as usize,
                           settings.map_height as usize,
+                          settings.ocean_line,
+                          settings.tree_line,
                           &*height_map),
             cursor: Point::new(5, 5),
             camera: Point::new(0, 0),
@@ -54,6 +56,8 @@ impl Game {
         let height_map = get_height_map(&self.settings);
         self.map = Map::new(self.settings.map_width as usize,
                             self.settings.map_width as usize,
+                            self.settings.ocean_line,
+                            self.settings.tree_line,
                             &*height_map);
     }
 

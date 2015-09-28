@@ -17,6 +17,8 @@ pub struct Settings {
     pub height_map_coefficient: f32,
     pub height_map_lacunarity: f32,
     pub height_map_hurst: f32,
+    pub tree_line: u8,
+    pub ocean_line: u8,
 }
 
 impl Settings {
@@ -45,6 +47,8 @@ impl Settings {
                 .as_f64().unwrap() as f32,
             height_map_hurst: doc["height_map"]["hurst"]
                 .as_f64().unwrap() as f32,
+            tree_line: doc["world_gen"]["tree_line"].as_i64().unwrap() as u8,
+            ocean_line: doc["world_gen"]["ocean_line"].as_i64().unwrap() as u8,
         })
     }
 }

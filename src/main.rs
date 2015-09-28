@@ -2,6 +2,7 @@
 
 extern crate tcod;
 extern crate yaml_rust;
+extern crate num;
 
 use tcod::console::{Root, Console, FontLayout, FontType};
 
@@ -12,6 +13,7 @@ mod point;
 mod game;
 mod render;
 mod map;
+mod biome;
 
 use game::Game;
 use settings::Settings;

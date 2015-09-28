@@ -3,6 +3,7 @@ use tcod::console::{Root, Console, BackgroundFlag};
 use tcod::colors;
 
 use game::Game;
+use map::Tile;
 
 pub fn render_screen(game: &Game, root: &mut Root) {
     root.clear();
@@ -10,13 +11,10 @@ pub fn render_screen(game: &Game, root: &mut Root) {
     
     for x in (0..game.map_console.width()) {
         for y in (0..game.map_console.height()) {
-            let height = game.map.get_tile(x as usize + game.camera.x as usize,
-                                           y as usize + game.camera.y as usize) as u8;
-            root.put_char_ex(x,
-                             y,
-                             ' ',
-                             colors::WHITE,
-                             colors::Color::new(0, 0, height));
+            let tile = game.map.get_tile(x as usize + game.camera.x as usize,
+                                         y as usize + game.camera.y as usize);
+            let (character, fg, bg) = tile.graphical_representation();
+            root.put_char_ex(x, y, character, fg, bg);
         }
     }
 
