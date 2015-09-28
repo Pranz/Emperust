@@ -7,8 +7,8 @@ map_window:
     width: 30
     height: 30
 map:
-    width: 100
-    height: 100
+    width: 1000
+    height: 1000
 height_map:
     coefficient: 0.05
     lacunarity: 0.8

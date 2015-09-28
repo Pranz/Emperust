@@ -13,7 +13,7 @@ impl<T> Point<T> {
     }
     
     #[inline(always)]
-    pub fn map(self, f: &Fn(T) -> T) -> Point<T> {
+    pub fn map<F: Fn(T) -> T>(self, f: F) -> Point<T> {
         Point {x: f(self.x), y: f(self.y)}
     }
 }
