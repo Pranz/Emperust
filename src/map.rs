@@ -4,6 +4,7 @@ use tcod::noise::{Noise, NoiseType};
 use tcod::{Color, colors};
 
 use num::pow;
+use itertools::Product;
 
 use settings::Settings;
 use biome::Biome;
@@ -65,7 +66,7 @@ impl Map {
                 x < self.width &&
                 y >= 0 &&
                 y < self.height);
-        self.tiles[x + y * self.width]
+        self.tiles[x * self.height + y]
     }
 }
 
@@ -95,6 +96,34 @@ pub fn get_height_map(settings: &Settings) -> Box<Fn(usize, usize) -> u8> {
         let distance = (pow(x - map_width as f32 / 2.0, 2) +
                         pow(y - map_height as f32 / 2.0, 2))
             .sqrt() / max_distance;
-        255 - (((height as u16 + height2 as u16) / 2) as u8 / 2 + (distance * 128.0) as u8)
+        255 - ((((height as u16 + height2 as u16) as f32 / 2.0) as f32 / 1.5) as u8 + (distance * 85.0) as u8)
     })
+}
+
+pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -> Map {
+    let (ratioX, ratioY, remainderX, remainderY) = (map.width / width,
+                                                    map.height / height,
+                                                    map.width % width,
+                                                    map.height % height);
+    let mut tiles = Vec::new();
+    let (ocean_line, tree_line) = (settings.ocean_line, settings.tree_line);
+    
+    for (x,y) in Product::new((0..width),(0..height)) {
+        let height = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
+            map.get_tile(xx,yy).height
+        }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
+        tiles.push(Tile {
+            height: (height as u8),
+            biome: if (height as u8) < ocean_line
+            { Biome::Ocean } else if (height as u8) < tree_line
+            { Biome::Plains } else
+            { Biome::Mountain }
+        });
+    }
+    Map {
+        tiles: tiles,
+        width: width,
+        height: height,
+    }
+    
 }

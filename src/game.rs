@@ -4,7 +4,7 @@ use tcod::console::{Console, Offscreen};
 use settings::Settings;
 use input::UserCommand;
 use point::Point;
-use map::{Map, get_height_map};
+use map::{Map, get_height_map, zoomed_map};
 use direction::Direction;
 
 use std::cmp::{min, max};
@@ -13,26 +13,35 @@ const CAMERA_STRICTNESS : usize = 8;
 
 pub struct Game {
     pub map: Map,
+    pub zoomed_map: Map,
     pub cursor: Point<i32>,
     pub camera: Point<i32>,
     pub settings: Settings,
     pub map_console: Offscreen,
+    pub zoomed_map_console: Offscreen,
 }
 
 
 impl Game {
     pub fn new(settings: Settings) -> Game {
         let height_map = get_height_map(&settings);
-        Game {
-            map: Map::new(settings.map_width as usize,
+        let map = Map::new(settings.map_width as usize,
                           settings.map_height as usize,
                           settings.ocean_line,
                           settings.tree_line,
-                          &*height_map),
+                          &*height_map);
+        Game {
+            zoomed_map: zoomed_map(&map,
+                                   settings.zoomed_map_width,
+                                   settings.zoomed_map_height,
+                                   &settings),
+            map: map,
             cursor: Point::new(5, 5),
             camera: Point::new(0, 0),
             map_console: Offscreen::new(settings.map_window_width as i32,
                                         settings.map_window_height as i32),
+            zoomed_map_console: Offscreen::new(settings.zoomed_map_width as i32,
+                                               settings.zoomed_map_height as i32),
             settings: settings,
         }
     }
@@ -59,6 +68,8 @@ impl Game {
                             self.settings.ocean_line,
                             self.settings.tree_line,
                             &*height_map);
+        self.zoomed_map = zoomed_map(&self.map, self.settings.zoomed_map_width,
+                                     self.settings.zoomed_map_height, &self.settings);
     }
 
     pub fn move_cursor(&mut self, dpos: Point<i32>) {
@@ -97,5 +108,12 @@ impl Game {
             }
         }
 
+    }
+
+    pub fn get_zoomed_out_cursor(&self) -> Point<i32> {
+        Point {
+            x: ((self.cursor.x as f32 / self.map.width as f32) * (self.zoomed_map_console.width() as f32)) as i32 ,
+            y: ((self.cursor.y as f32 / self.map.height as f32) * (self.zoomed_map_console.height() as f32)) as i32,
+        }
     }
 }

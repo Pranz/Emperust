@@ -14,6 +14,8 @@ pub struct Settings {
     pub map_window_height: usize,
     pub map_width: usize,
     pub map_height: usize,
+    pub zoomed_map_width: usize,
+    pub zoomed_map_height: usize,
     pub height_map_coefficient: f32,
     pub height_map_lacunarity: f32,
     pub height_map_hurst: f32,
@@ -41,6 +43,10 @@ impl Settings {
             map_height: doc["map"]["height"].as_i64().unwrap() as usize,
             map_window_width: doc["map_window"]["width"].as_i64().unwrap() as usize,
             map_window_height: doc["map_window"]["height"].as_i64().unwrap() as usize,
+            zoomed_map_width: doc["zoomed_map_window"]["width"]
+                .as_i64().unwrap() as usize,
+            zoomed_map_height: doc["zoomed_map_window"]["height"]
+                .as_i64().unwrap() as usize,
             height_map_coefficient: doc["height_map"]["coefficient"]
                 .as_f64().unwrap() as f32,
             height_map_lacunarity: doc["height_map"]["lacunarity"]

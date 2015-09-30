@@ -1,16 +1,19 @@
 font_path: fonts/arial10x10.png
 title: Min skit
 main_window:
-    width: 150
+    width: 180
     height: 100
 map_window:
+    width: 100
+    height: 60
+zoomed_map_window:
     width: 60
     height: 60
 map:
     width: 500
     height: 500
 height_map:
-    coefficient: 0.05
+    coefficient: 0.03
     lacunarity: 8.0
     hurst: 16.0
 world_gen:

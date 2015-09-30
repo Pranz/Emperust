@@ -3,6 +3,7 @@
 extern crate tcod;
 extern crate yaml_rust;
 extern crate num;
+#[macro_use] extern crate itertools;
 
 use tcod::console::{Root, Console, FontLayout, FontType};
 
@@ -36,7 +37,7 @@ fn main() {
     tcod::system::set_fps(20);
 
     while !root.window_closed() {
-        render_screen(&game, &mut root);
+        render_screen(&mut game, &mut root);
         
         let command = handle_input(&mut root);
         if command == UserCommand::Exit {

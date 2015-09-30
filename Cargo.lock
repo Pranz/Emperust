@@ -2,6 +2,7 @@
 name = "emperust2"
 version = "0.1.0"
 dependencies = [
+ "itertools 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num 0.1.27 (registry+https://github.com/rust-lang/crates.io-index)",
  "tcod 0.7.0 (git+https://github.com/tomassedovic/tcod-rs)",
  "yaml-rust 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -19,6 +20,11 @@ dependencies = [
 [[package]]
 name = "bitflags"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "itertools"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
