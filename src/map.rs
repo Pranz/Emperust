@@ -8,7 +8,7 @@ use itertools::Product;
 
 use settings::Settings;
 use biome::Biome;
-use world_gen::{get_noise_map, combine_scalar_fields, get_distance_map};
+use world_gen::{get_noise_map, combine_scalar_fields, get_distance_map, get_distance_vertical_map};
 
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -19,17 +19,19 @@ pub struct Tile {
 
 impl Tile {
     pub fn graphical_representation(self) -> (char, Color, Color) {
-        match self.biome {
-            Biome::Ocean => (' ', colors::WHITE, Color::new(0,0, ((self.height as f32 - 25.0) * 2.0) as u8)),
-            Biome::Plains => (',', colors::DARKER_CHARTREUSE, colors::DARK_CHARTREUSE),
-            Biome::Mountain => ('^', colors::GREY, colors::DARK_GREY),
-        }
+        self.biome.graphical_representation(self.height)
     }
-
 }
 
 pub struct Map {
     pub height_map: Vec<u8>,
+    pub biome_map: Vec<Biome>,
+    pub temperature_map: Box<Fn(usize, usize) -> u8>,
+    pub width: usize,
+    pub height: usize,
+}
+
+pub struct ZoomedMap {
     pub biome_map: Vec<Biome>,
     pub width: usize,
     pub height: usize,
@@ -40,26 +42,25 @@ impl Map {
                   height: usize,
                   ocean_line: u8,
                   tree_line: u8,
-                  height_map: F)
+                  height_map: F,
+                  temperature_map: Box<Fn(usize, usize) -> u8>)
                   -> Map
     where F: Fn(usize, usize) -> u8 {
         let mut heights: Vec<u8> = Vec::new();
-        let mut biome_map: Vec<Biome> = Vec::new();
+        let mut biomes: Vec<Biome> = Vec::new();
         
         for x in (0..width) {
             for y in (0..height) {
                 let height = height_map(x,y);
                 heights.push(height);
-                biome_map.push(if height < ocean_line
-                               { Biome::Ocean } else if height < tree_line
-                               { Biome::Plains } else
-                               { Biome::Mountain });
+                biomes.push(Biome::new(height, temperature_map(x,y), tree_line, ocean_line));
             }
         }
         
         Map {
             height_map: heights,
-            biome_map: biome_map,
+            biome_map: biomes,
+            temperature_map: temperature_map,
             width: width,
             height: height,
         }
@@ -88,6 +89,12 @@ impl Map {
     }
 }
 
+impl ZoomedMap {
+    pub fn get_biome(&self, x: usize, y: usize) -> Biome {
+        self.biome_map[x * self.height + y]
+    }
+}
+
 //
 // Generates a height map using Settings
 //
@@ -95,23 +102,46 @@ pub fn get_height_map(settings: &Settings) -> Box<Fn(usize, usize) -> u8> {
     let noise_gen = get_noise_map(settings.height_map_lacunarity,
                                   settings.height_map_hurst,
                                   settings.height_map_coefficient);
+    let turbulence = get_noise_map(settings.height_map_lacunarity,
+                                   settings.height_map_hurst,
+                                   settings.height_map_coefficient * 6.0);
     let map_width = settings.map_width;
     let map_height = settings.map_height;
     let distance_map = get_distance_map(map_width as f32, map_height as f32);
     
-    let height_map = combine_scalar_fields(vec![(noise_gen, 0.6), (distance_map, 0.4)]);
+    let height_map = combine_scalar_fields(vec![(noise_gen, 0.6),
+                                                (turbulence, 0.1),
+                                                (distance_map, 0.3)]);
     Box::new(move |x: usize, y: usize| {
         let (x, y) = (x as f32, y as f32);
         (height_map(x,y) * 255.0) as u8
     })
 }
 
-pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -> Map {
+pub fn get_temperature_map(settings: &Settings) -> Box<Fn(usize, usize) -> u8> {
+    let noise_gen = get_noise_map(settings.height_map_lacunarity,
+                                  settings.height_map_hurst,
+                                  settings.height_map_coefficient);
+    let turbulence = get_noise_map(settings.height_map_lacunarity,
+                                   settings.height_map_hurst,
+                                   settings.height_map_coefficient *
+                                   settings.temperature_turbulence);
+    let distance_map = get_distance_vertical_map(settings.map_height as f32);
+    let temperature_map = combine_scalar_fields(
+        vec![(turbulence, settings.temperature_turbulence_dependence),
+             (distance_map, settings.temperature_y_dependence),
+             (noise_gen, 1.0 - settings.temperature_y_dependence - settings.temperature_turbulence_dependence)]);
+    Box::new(move |x: usize, y: usize| {
+        let (x,y) = (x as f32, y as f32);
+        (temperature_map(x,y) * 255.0) as u8
+    })
+}
+
+pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -> ZoomedMap {
     let (ratioX, ratioY, remainderX, remainderY) = (map.width / width,
                                                     map.height / height,
                                                     map.width % width,
                                                     map.height % height);
-    let mut height_map = Vec::new();
     let mut biome_map = Vec::new();
     let (ocean_line, tree_line) = (settings.ocean_line, settings.tree_line);
     
@@ -119,14 +149,13 @@ pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -
         let height = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
             map.get_height(xx,yy)
         }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
-        height_map.push((height as u8));
-        biome_map.push(if (height as u8) < ocean_line
-                       { Biome::Ocean } else if (height as u8) < tree_line
-                       { Biome::Plains } else
-                       { Biome::Mountain });
+        let temperature = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
+            (*map.temperature_map)(xx,yy)
+        }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
+
+        biome_map.push(Biome::new(height as u8, temperature as u8, tree_line, ocean_line));
     }
-    Map {
-        height_map: height_map,
+    ZoomedMap {
         biome_map: biome_map,
         width: width,
         height: height,

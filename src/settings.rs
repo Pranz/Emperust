@@ -23,6 +23,9 @@ pub struct Settings {
     pub height_map_hurst: f32,
     pub tree_line: u8,
     pub ocean_line: u8,
+    pub temperature_y_dependence: f32,
+    pub temperature_turbulence: f32,
+    pub temperature_turbulence_dependence: f32,
 }
 
 impl Settings {
@@ -61,6 +64,12 @@ impl Settings {
                 .as_f64().unwrap() as f32,
             tree_line: doc["world_gen"]["tree_line"].as_i64().unwrap() as u8,
             ocean_line: doc["world_gen"]["ocean_line"].as_i64().unwrap() as u8,
+            temperature_turbulence_dependence: doc["temperature"]["turbulence_dependence"]
+                .as_f64().unwrap() as f32,
+            temperature_y_dependence: doc["temperature"]["y_dependence"]
+                .as_f64().unwrap() as f32,
+            temperature_turbulence: doc["temperature"]["y_dependence"]
+                .as_f64().unwrap() as f32,
         })
     }
 }

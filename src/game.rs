@@ -4,7 +4,7 @@ use tcod::console::{Console, Offscreen};
 use settings::Settings;
 use input::UserCommand;
 use point::Point;
-use map::{Map, get_height_map, zoomed_map};
+use map::{Map, ZoomedMap, get_height_map, get_temperature_map, zoomed_map};
 use direction::Direction;
 
 use std::cmp::{min, max};
@@ -13,7 +13,7 @@ const CAMERA_STRICTNESS : usize = 8;
 
 pub struct Game {
     pub map: Map,
-    pub zoomed_map: Map,
+    pub zoomed_map: ZoomedMap,
     pub cursor: Point<i32>,
     pub camera: Point<i32>,
     pub settings: Settings,
@@ -26,11 +26,13 @@ pub struct Game {
 impl Game {
     pub fn new(settings: Settings) -> Game {
         let height_map = get_height_map(&settings);
+        let temperature_map = get_temperature_map(&settings);
         let map = Map::new(settings.map_width as usize,
-                          settings.map_height as usize,
-                          settings.ocean_line,
-                          settings.tree_line,
-                          &*height_map);
+                           settings.map_height as usize,
+                           settings.ocean_line,
+                           settings.tree_line,
+                           &*height_map,
+                           temperature_map);
         Game {
             zoomed_map: zoomed_map(&map,
                                    settings.zoomed_map_width,
@@ -66,11 +68,13 @@ impl Game {
 
     pub fn regenerate_map(&mut self) {
         let height_map = get_height_map(&self.settings);
+        let temperature_map = get_temperature_map(&self.settings);
         self.map = Map::new(self.settings.map_width as usize,
                             self.settings.map_width as usize,
                             self.settings.ocean_line,
                             self.settings.tree_line,
-                            &*height_map);
+                            &*height_map,
+                            temperature_map);
         self.zoomed_map = zoomed_map(&self.map, self.settings.zoomed_map_width,
                                      self.settings.zoomed_map_height, &self.settings);
     }

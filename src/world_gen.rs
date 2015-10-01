@@ -45,3 +45,10 @@ pub fn get_distance_map(map_width: f32, map_height: f32) -> ScalarField {
          .sqrt() / max_distance)
     })
 }
+
+pub fn get_distance_vertical_map(map_height: f32) -> ScalarField {
+    let center_y = map_height / 2.0;
+    Box::new(move |_, y| { 1.0 - ((y - center_y).abs() / center_y)})
+}
+
+

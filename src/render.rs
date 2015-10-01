@@ -44,8 +44,8 @@ pub fn render_map_zoomed_out(game: &mut Game) {
     let (cursor, con, map) = (game.get_zoomed_out_cursor(), &mut game.zoomed_map_console, &game.zoomed_map);
 
     for (x,y) in Product::new((0..con.width()), (0..con.height())) {
-        let tile = map.get_tile(x as usize, y as usize);
-        let (character, fg ,bg) = tile.graphical_representation();
+        let biome = map.get_biome(x as usize, y as usize);
+        let (character, fg ,bg) = biome.graphical_representation(100);
         con.put_char_ex(x, y, character, fg, bg);
     }
 

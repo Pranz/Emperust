@@ -10,12 +10,16 @@ zoomed_map_window:
     width: 60
     height: 60
 map:
-    width: 500
-    height: 500
+    width: 250
+    height: 250
 height_map:
-    coefficient: 0.03
+    coefficient: 0.02
     lacunarity: 8.0
     hurst: 16.0
+temperature:
+    y_dependence: 0.2
+    turbulence: 12.0
+    turbulence_dependence: 0.3
 world_gen:
     tree_line: 170
     ocean_line: 140
