@@ -19,6 +19,7 @@ pub struct Game {
     pub settings: Settings,
     pub map_console: Offscreen,
     pub zoomed_map_console: Offscreen,
+    pub debug_console: Offscreen,
 }
 
 
@@ -42,6 +43,8 @@ impl Game {
                                         settings.map_window_height as i32),
             zoomed_map_console: Offscreen::new(settings.zoomed_map_width as i32,
                                                settings.zoomed_map_height as i32),
+            debug_console: Offscreen::new(settings.debug_console_width as i32,
+                                          settings.debug_console_height as i32),
             settings: settings,
         }
     }

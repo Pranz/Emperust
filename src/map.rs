@@ -99,7 +99,7 @@ pub fn get_height_map(settings: &Settings) -> Box<Fn(usize, usize) -> u8> {
     let map_height = settings.map_height;
     let distance_map = get_distance_map(map_width as f32, map_height as f32);
     
-    let height_map = combine_scalar_fields(vec![(noise_gen, 0.5), (distance_map, 0.5)]);
+    let height_map = combine_scalar_fields(vec![(noise_gen, 0.6), (distance_map, 0.4)]);
     Box::new(move |x: usize, y: usize| {
         let (x, y) = (x as f32, y as f32);
         (height_map(x,y) * 255.0) as u8
