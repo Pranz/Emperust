@@ -8,6 +8,8 @@ use itertools::Product;
 
 use settings::Settings;
 use biome::Biome;
+use world_gen::{get_noise_map, combine_scalar_fields, get_distance_map};
+
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Tile {
@@ -23,6 +25,7 @@ impl Tile {
             Biome::Mountain => ('^', colors::GREY, colors::DARK_GREY),
         }
     }
+
 }
 
 pub struct Map {
@@ -62,15 +65,26 @@ impl Map {
         }
     }
 
+    pub fn in_bounds(&self, x: usize, y: usize) -> bool {
+        x >= 0 && x < self.width &&
+            y >= 0 && y < self.height
+    }
+
     pub fn get_tile(&self, x: usize, y: usize) -> Tile {
-        assert!(x >= 0 &&
-                x < self.width &&
-                y >= 0 &&
-                y < self.height);
         Tile {
             height: self.height_map[x * self.height + y],
             biome: self.biome_map[x * self.height + y],
         }
+    }
+
+    #[inline(always)]
+    pub fn get_height(&self, x: usize, y: usize) -> u8 {
+        self.height_map[x * self.height + y]
+    }
+
+    #[inline(always)]
+    pub fn get_biome(&self, x: usize, y: usize) -> Biome {
+        self.biome_map[x * self.height + y]
     }
 }
 
@@ -78,29 +92,17 @@ impl Map {
 // Generates a height map using Settings
 //
 pub fn get_height_map(settings: &Settings) -> Box<Fn(usize, usize) -> u8> {
-    let k = settings.height_map_coefficient;
-    let noise_gen = Noise::init_with_dimensions(2)
-        .noise_type(NoiseType::Perlin)
-        .lacunarity(settings.height_map_lacunarity)
-        .hurst(settings.height_map_hurst)
-        .init();
-    let noise_gen2 = Noise::init_with_dimensions(2)
-        .noise_type(NoiseType::Perlin)
-        .lacunarity(settings.height_map_lacunarity)
-        .hurst(settings.height_map_hurst)
-        .init();
+    let noise_gen = get_noise_map(settings.height_map_lacunarity,
+                                  settings.height_map_hurst,
+                                  settings.height_map_coefficient);
     let map_width = settings.map_width;
     let map_height = settings.map_height;
-    let max_distance = (pow(map_width as f32 / 2.0, 2) +
-                        pow(map_height as f32 / 2.0, 2)).sqrt();
+    let distance_map = get_distance_map(map_width as f32, map_height as f32);
+    
+    let height_map = combine_scalar_fields(vec![(noise_gen, 0.5), (distance_map, 0.5)]);
     Box::new(move |x: usize, y: usize| {
         let (x, y) = (x as f32, y as f32);
-        let height = ((noise_gen.get(([x * k, y * k])) + 1f32) * 128f32) as u8;
-        let height2 = ((noise_gen2.get(([x * 0.001, y * 0.001])) + 1f32) * 128f32) as u8;
-        let distance = (pow(x - map_width as f32 / 2.0, 2) +
-                        pow(y - map_height as f32 / 2.0, 2))
-            .sqrt() / max_distance;
-        255 - ((((height as u16 + height2 as u16) as f32 / 2.0) as f32 / 1.5) as u8 + (distance * 85.0) as u8)
+        (height_map(x,y) * 255.0) as u8
     })
 }
 
@@ -115,7 +117,7 @@ pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -
     
     for (x,y) in Product::new((0..width),(0..height)) {
         let height = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
-            map.get_tile(xx,yy).height
+            map.get_height(xx,yy)
         }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
         height_map.push((height as u8));
         biome_map.push(if (height as u8) < ocean_line

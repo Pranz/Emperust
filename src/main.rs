@@ -15,6 +15,7 @@ mod game;
 mod render;
 mod map;
 mod biome;
+mod world_gen;
 
 use game::Game;
 use settings::Settings;
