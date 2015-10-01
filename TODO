@@ -1,0 +1,3 @@
+
+ * fix get_height_map, it should return the pure noise function and not convert to u8.
+ * Make a function that combines height maps.

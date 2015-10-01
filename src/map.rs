@@ -26,7 +26,8 @@ impl Tile {
 }
 
 pub struct Map {
-    tiles: Vec<Tile>,
+    pub height_map: Vec<u8>,
+    pub biome_map: Vec<Biome>,
     pub width: usize,
     pub height: usize,
 }
@@ -39,23 +40,23 @@ impl Map {
                   height_map: F)
                   -> Map
     where F: Fn(usize, usize) -> u8 {
-        let mut tiles: Vec<Tile> = Vec::new();
+        let mut heights: Vec<u8> = Vec::new();
+        let mut biome_map: Vec<Biome> = Vec::new();
         
         for x in (0..width) {
             for y in (0..height) {
                 let height = height_map(x,y);
-                tiles.push(Tile {
-                    height: height,
-                    biome: if height < ocean_line
-                    { Biome::Ocean } else if height < tree_line
-                    { Biome::Plains } else
-                    { Biome::Mountain }
-                });
+                heights.push(height);
+                biome_map.push(if height < ocean_line
+                               { Biome::Ocean } else if height < tree_line
+                               { Biome::Plains } else
+                               { Biome::Mountain });
             }
         }
         
         Map {
-            tiles: tiles,
+            height_map: heights,
+            biome_map: biome_map,
             width: width,
             height: height,
         }
@@ -66,7 +67,10 @@ impl Map {
                 x < self.width &&
                 y >= 0 &&
                 y < self.height);
-        self.tiles[x * self.height + y]
+        Tile {
+            height: self.height_map[x * self.height + y],
+            biome: self.biome_map[x * self.height + y],
+        }
     }
 }
 
@@ -105,23 +109,23 @@ pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -
                                                     map.height / height,
                                                     map.width % width,
                                                     map.height % height);
-    let mut tiles = Vec::new();
+    let mut height_map = Vec::new();
+    let mut biome_map = Vec::new();
     let (ocean_line, tree_line) = (settings.ocean_line, settings.tree_line);
     
     for (x,y) in Product::new((0..width),(0..height)) {
         let height = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
             map.get_tile(xx,yy).height
         }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
-        tiles.push(Tile {
-            height: (height as u8),
-            biome: if (height as u8) < ocean_line
-            { Biome::Ocean } else if (height as u8) < tree_line
-            { Biome::Plains } else
-            { Biome::Mountain }
-        });
+        height_map.push((height as u8));
+        biome_map.push(if (height as u8) < ocean_line
+                       { Biome::Ocean } else if (height as u8) < tree_line
+                       { Biome::Plains } else
+                       { Biome::Mountain });
     }
     Map {
-        tiles: tiles,
+        height_map: height_map,
+        biome_map: biome_map,
         width: width,
         height: height,
     }

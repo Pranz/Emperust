@@ -22,7 +22,6 @@ pub fn render_screen(game: &mut Game, root: &mut Root) {
 pub fn render_map_zoomed_in(game: &mut Game) {
     let (con, cursor, camera, map) = (&mut game.map_console, game.cursor, game.camera, &game.map);
     
-    con.clear();
 
     for x in (0..con.width()) {
         for y in (0..con.height()) {
