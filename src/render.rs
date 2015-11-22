@@ -3,8 +3,10 @@ use tcod::console::{Root, Console, BackgroundFlag, blit};
 use tcod::colors;
 
 use itertools::Product;
+use std::sync::mpsc::Receiver;
 
-use game::Game;
+use biome::Biome;
+use game::{Game, ProgressInfo};
 use map::Tile;
 
 pub fn render_screen(game: &mut Game, root: &mut Root) {
@@ -45,7 +47,11 @@ pub fn render_map_zoomed_out(game: &mut Game) {
 
     for (x,y) in Product::new((0..con.width()), (0..con.height())) {
         let biome = map.get_biome(x as usize, y as usize);
-        let (character, fg ,bg) = biome.graphical_representation(100);
+        let (character, fg ,bg) = match biome {
+            Biome::Ocean => biome.graphical_representation(100),
+            Biome::Mountain => biome.graphical_representation(180),
+            _ => biome.graphical_representation(0),
+        };
         con.put_char_ex(x, y, character, fg, bg);
     }
 
@@ -58,12 +64,41 @@ pub fn render_debug_info(game: &mut Game) {
     con.clear();
 
     let tile = map.get_tile(cursor.x as usize, cursor.y as usize);
-    let info: [String; 3] = ["Position x: ".to_string() + &cursor.x.to_string(),
+    let info: [String; 6] = ["Position x: ".to_string() + &cursor.x.to_string(),
                              "Position y: ".to_string() + &cursor.y.to_string(),
-                             "Height: ".to_string() + &tile.height.to_string()];
+                             "Height: ".to_string() + &tile.height.to_string(),
+                             "Temperature: ".to_string() + &tile.temperature.to_string(),
+                             "Rainfall: ".to_string() + &tile.rainfall.to_string(),
+                             format!("Biome: {:?}", &tile.biome).to_string()];
 
     for (i, text) in info.iter().enumerate() {
         con.print(0, i as i32, text);
     }
 
+}
+
+pub fn render_progress(root: &mut Root, width: usize, rx: Receiver<ProgressInfo>){
+    root.set_default_foreground(colors::WHITE);
+    root.print(3, 3, "Generating map: ");
+    print!("yo\n");
+    loop {
+        let info = {
+            let mut info = ProgressInfo::Done;
+            loop {
+                match rx.try_recv() {
+                    Ok(x) => { info = x; },
+                    Err(_) => { break; },
+                }
+            }
+            info
+        };
+        root.flush();
+        root.clear();
+        match info {
+            ProgressInfo::FinishedColumn(n) => {
+                root.print(19, 3,n.to_string() + " / " + &width.to_string());
+            },
+            ProgressInfo::Done => { return (); },
+        }
+    }
 }

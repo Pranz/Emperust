@@ -7,6 +7,9 @@ extern crate num;
 
 use tcod::console::{Root, Console, FontLayout, FontType};
 
+use std::thread;
+use std::sync::mpsc::channel;
+
 mod settings;
 mod input;
 mod direction;
@@ -20,7 +23,7 @@ mod world_gen;
 use game::Game;
 use settings::Settings;
 use input::{handle_input, UserCommand};
-use render::render_screen;
+use render::{render_screen, render_progress};
 
 fn main() {
     let settings = Settings::read("settings.yaml").unwrap();
@@ -32,10 +35,17 @@ fn main() {
         .title(&settings.title)
         .init();
 
-    
-    let mut game = Game::new(settings);
-
     tcod::system::set_fps(20);
+
+    let (tx, rx) = channel();
+    let width = settings.map_width;
+    let t = thread::spawn(move || {
+        render_progress(&mut root, width , rx);
+        return root;
+    });
+    
+    let mut game = Game::new(settings, tx);
+    let mut root = t.join().unwrap();
 
     while !root.window_closed() {
         render_screen(&mut game, &mut root);
@@ -47,7 +57,5 @@ fn main() {
         else {
             game.execute_command(command);
         }
-        
-
     }
 }

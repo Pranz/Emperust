@@ -26,6 +26,11 @@ pub struct Settings {
     pub temperature_y_dependence: f32,
     pub temperature_turbulence: f32,
     pub temperature_turbulence_dependence: f32,
+    pub temperature_coefficient: f32,
+    pub rainfall_coefficient: f32,
+    pub rainfall_height_dependence: f32,
+    pub rainfall_turbulence: f32,
+    pub rainfall_turbulence_dependence: f32,
 }
 
 impl Settings {
@@ -69,6 +74,16 @@ impl Settings {
             temperature_y_dependence: doc["temperature"]["y_dependence"]
                 .as_f64().unwrap() as f32,
             temperature_turbulence: doc["temperature"]["y_dependence"]
+                .as_f64().unwrap() as f32,
+            temperature_coefficient: doc["temperature"]["coefficient"]
+                .as_f64().unwrap() as f32,
+            rainfall_height_dependence: doc["rainfall"]["height_dependence"]
+                .as_f64().unwrap() as f32,
+            rainfall_turbulence_dependence: doc["rainfall"]["turbulence_dependence"]
+                .as_f64().unwrap() as f32,
+            rainfall_turbulence: doc["rainfall"]["turbulence"]
+                .as_f64().unwrap() as f32,
+            rainfall_coefficient: doc["rainfall"]["coefficient"]
                 .as_f64().unwrap() as f32,
         })
     }

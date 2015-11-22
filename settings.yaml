@@ -1,4 +1,4 @@
-font_path: fonts/arial10x10.png
+font_path: fonts/consolas10x10_gs_tc.png
 title: Min skit
 main_window:
     width: 180
@@ -10,18 +10,24 @@ zoomed_map_window:
     width: 60
     height: 60
 map:
-    width: 250
-    height: 250
+    width: 1000
+    height: 1000
 height_map:
-    coefficient: 0.02
+    coefficient: 0.015
     lacunarity: 8.0
     hurst: 16.0
 temperature:
-    y_dependence: 0.2
-    turbulence: 12.0
+    y_dependence: 0.3
+    turbulence: 6.0
     turbulence_dependence: 0.3
+    coefficient: 0.025
+rainfall:
+    coefficient: 0.05
+    height_dependence: 0.4
+    turbulence: 6.0
+    turbulence_dependence: 0.2
 world_gen:
-    tree_line: 170
+    tree_line: 167
     ocean_line: 140
 debug_window:
     width: 50
