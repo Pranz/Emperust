@@ -7,6 +7,7 @@ authors = ["Jesper Fridefors <jesper.fridefors@gmail.com>"]
 yaml-rust = "*"
 num = "*"
 itertools = "0.4"
+rand = "0.3"
 
 [dependencies.tcod]
 git = "https://github.com/tomassedovic/tcod-rs"

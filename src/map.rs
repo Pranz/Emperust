@@ -1,19 +1,22 @@
 
 
 use tcod::noise::{Noise, NoiseType};
-use tcod::{Color, colors};
+use tcod::{Color, colors, chars};
 
 use num::pow;
 use itertools::Product;
 use std::sync::mpsc::Sender;
+use rand::{thread_rng, sample};
 
+use point::Point;
 use settings::Settings;
-use biome::Biome;
+use biome::{Biome, BiomeType, BiomeRepresentation};
 use world_gen::{get_noise_map, combine_scalar_fields, get_distance_map, get_distance_vertical_map};
 use game::ProgressInfo;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Tile {
+    pub position: Point<usize>,
     pub height: u8,
     pub temperature: u8,
     pub rainfall: u8,
@@ -21,8 +24,50 @@ pub struct Tile {
 }
 
 impl Tile {
-    pub fn graphical_representation(self) -> (char, Color, Color) {
-        self.biome.graphical_representation(self.height)
+    pub fn graphical_representation(self, map: &Map) -> (char, Color, Color) {
+        match self.biome.graphical_representation() {
+            BiomeRepresentation::Standard(chr, fg, bg) => (chr, fg, bg),
+            BiomeRepresentation::Ocean =>
+                (' ', colors::WHITE, Color::new(0,0, ((self.height as f32 - 25.0) * 2.0) as u8)),
+            BiomeRepresentation::Mountain => {
+                ('^', if self.height > 182 { colors::LIGHTEST_GREY }
+                 else if self.height > 175 { colors::LIGHTER_GREY }
+                 else { colors::LIGHT_GREY }, colors::DARK_GREY)
+            },
+            BiomeRepresentation::River => {
+                let neighbour_rivers: Vec<(isize, isize)> = map
+                    .neighbour_positions(self.position.x, self.position.y)
+                    .into_iter()
+                    .filter(|&(x,y)|
+                            map.get_biome(x,y) == Biome::River)
+                    .map(|(x,y)|
+                         (self.position.x as isize - x as isize,
+                          self.position.y as isize - y as isize))
+                    .collect();
+
+                let chr = if neighbour_rivers.contains(&(1, 0)) &&
+                    neighbour_rivers.contains(&(0, 1))
+                { chars::SE }
+                else if neighbour_rivers.contains(&(1, 0)) &&
+                    neighbour_rivers.contains(&(0, -1))
+                { chars::NE }
+                else if neighbour_rivers.contains(&(-1, 0)) &&
+                    neighbour_rivers.contains(&(0, 1))
+                { chars::SW }
+                else if neighbour_rivers.contains(&(-1, 0)) &&
+                    neighbour_rivers.contains(&(0, -1))
+                { chars::NW }
+                else if neighbour_rivers.contains(&(-1, 0)) &&
+                    neighbour_rivers.contains(&(1, 0))
+                { chars::HLINE }
+                else if neighbour_rivers.contains(&(0, -1)) &&
+                    neighbour_rivers.contains(&(0, 1))
+                { chars::VLINE }
+                else { '+' };
+                
+                (chr, colors::LIGHTER_BLUE, colors::BLUE)
+            },
+        }
     }
 }
 
@@ -48,6 +93,7 @@ impl Map {
                height: usize,
                ocean_line: u8,
                tree_line: u8,
+               rivers: usize,
                height_map: DiscreteField,
                temperature_map: DiscreteField,
                rainfall_map: Box<Fn(usize, usize, u8) -> u8>,
@@ -69,22 +115,109 @@ impl Map {
 
         tx.map(|s| s.send(ProgressInfo::Done));
         
-        Map {
+        let mut map = Map {
             height_map: heights,
             biome_map: biomes,
             temperature_map: temperature_map,
             rainfall_map: rainfall_map,
             width: width,
             height: height,
+        };
+        map.create_rivers(rivers);
+        map
+    }
+
+    pub fn create_rivers(&mut self, amount: usize) -> Vec<Vec<(usize, usize)>> {
+        let random_points = sample(
+            &mut thread_rng(),
+            iproduct!(0..self.width, 0..self.height),
+            amount);
+        random_points.into_iter().map(|(x,y)| {
+            let (highest_x, highest_y) = iproduct!(0..10, 0..10)
+                .map(|(offset_x, offset_y)|
+                     (x + offset_x, y + offset_y))
+                .filter(|&(xx, yy)|
+                        self.in_bounds(xx,yy))
+                .max_by(|&(xx, yy)|
+                        self.get_height(xx,yy))
+                .unwrap();
+            
+            self.create_river(highest_x, highest_y)
+        }).collect()
+    }
+
+    pub fn create_river(&mut self, x_orig: usize, y_orig: usize) -> Vec<(usize, usize)> {
+        if self.get_biome(x_orig,y_orig).category() == BiomeType::Water {
+            return vec![];
         }
+        
+        let mut nodes = vec![(x_orig, y_orig)];
+        self.set_biome(x_orig, y_orig, Biome::River);
+        let (mut x, mut y) = (x_orig as isize, y_orig as isize);
+        let mut rng = thread_rng();
+        
+        while nodes.len() < 35 {
+            let potential_nodes : Vec<(isize, isize)> =
+                vec![(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+                .into_iter()
+                .filter(|&t| {
+                    let (xx,yy) = t;
+                    self.in_bounds_isize(xx as isize,yy as isize) &&
+                        self.get_height(xx as usize, yy as usize) <
+                        (self.get_height(x as usize, y as usize) + 6) &&
+                        self.neighbour_positions(xx as usize, yy as usize)
+                        .into_iter()
+                        .filter(|&t|
+                                self.get_biome(t.0,t.1) == Biome::River)
+                        .count() < 2
+                }).collect();
+
+            // If it is empty, returns nodes.
+            // If any neighbour is water, returns nodes
+            if potential_nodes.len() == 0 ||
+                potential_nodes.iter().any(|&(xx,yy)| {
+                    let biome = self.get_biome(xx as usize, yy as usize);
+                    biome == Biome::Ocean
+                })
+            { return nodes; }
+
+            let random_node = sample(&mut rng, potential_nodes.iter(), 1)[0];
+            
+            x = random_node.0 as isize;
+            y = random_node.1 as isize;
+            self.set_biome(x as usize, y as usize, Biome::River);
+            nodes.push((x as usize, y as usize));
+        }
+        nodes
     }
 
     pub fn in_bounds(&self, x: usize, y: usize) -> bool {
         x < self.width && y < self.height
     }
 
+    pub fn neighbour_positions(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
+        let (x,y) = (x as isize, y as isize);
+        let neighbours: Vec<(usize, usize)> =
+            vec![(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+            .into_iter()
+            .filter(|&t|{
+                let (xx,yy) = t;
+                self.in_bounds_isize(xx,yy)
+            })
+            .map(|(xx,yy)|
+                 (xx as usize, yy as usize))
+            .collect();
+        neighbours
+    }
+
+    pub fn in_bounds_isize(&self, x: isize, y: isize) -> bool {
+        x < self.width as isize && y < self.height as isize
+            && x >= 0 && y >= 0
+    }
+
     pub fn get_tile(&self, x: usize, y: usize) -> Tile {
         Tile {
+            position: Point::new(x,y),
             height: self.height_map[x * self.height + y],
             rainfall: (*self.rainfall_map)(x, y, self.height_map[x * self.height + y]),
             temperature: (*self.temperature_map)(x,y),
@@ -100,6 +233,10 @@ impl Map {
     #[inline(always)]
     pub fn get_biome(&self, x: usize, y: usize) -> Biome {
         self.biome_map[x * self.height + y]
+    }
+
+    pub fn set_biome(&mut self, x: usize, y: usize, biome: Biome) {
+        self.biome_map[x * self.height + y] = biome;
     }
 }
 

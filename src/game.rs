@@ -35,13 +35,14 @@ impl Game {
         let rainfall_map = get_rainfall_map(&settings);
         let temperature_map = get_temperature_map(&settings);
         let map : Map = Map::new(settings.map_width as usize,
-                           settings.map_height as usize,
-                           settings.ocean_line,
-                           settings.tree_line,
-                           height_map,
-                           temperature_map,
-                           rainfall_map,
-                           Some(&tx));
+                                 settings.map_height as usize,
+                                 settings.ocean_line,
+                                 settings.tree_line,
+                                 settings.river_amount,      
+                                 height_map,
+                                 temperature_map,
+                                 rainfall_map,
+                                 Some(&tx));
         Game {
             zoomed_map: zoomed_map(&map,
                                    settings.zoomed_map_width,
@@ -70,7 +71,10 @@ impl Game {
                     false => x,
                 }));
             }
-            UserCommand::RegenMap => {self.regenerate_map(); }
+            UserCommand::RegenMap => { self.regenerate_map(); }
+            UserCommand::CreateRiver => {
+                self.map.create_river(self.cursor.x as usize, self.cursor.y as usize);
+            }
             _ => {},
         }
     }
@@ -83,6 +87,7 @@ impl Game {
                             self.settings.map_width as usize,
                             self.settings.ocean_line,
                             self.settings.tree_line,
+                            self.settings.river_amount,
                             height_map,
                             temperature_map,
                             rainfall_map,

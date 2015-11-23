@@ -29,6 +29,7 @@ rainfall:
 world_gen:
     tree_line: 167
     ocean_line: 140
+    rivers: 200
 debug_window:
     width: 50
     height: 50

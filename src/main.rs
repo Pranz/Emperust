@@ -1,8 +1,10 @@
 #![allow(dead_code)]
+#![feature(iter_cmp)]
 
 extern crate tcod;
 extern crate yaml_rust;
 extern crate num;
+extern crate rand;
 #[macro_use] extern crate itertools;
 
 use tcod::console::{Root, Console, FontLayout, FontType};

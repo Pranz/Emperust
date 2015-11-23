@@ -1,7 +1,7 @@
 
 use std::ops::{Add, Sub, Neg};
 
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Point<T> {
     pub x: T,
     pub y: T,

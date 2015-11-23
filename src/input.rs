@@ -9,6 +9,7 @@ pub enum UserCommand {
     Exit,
     Move(Direction, bool),
     RegenMap,
+    CreateRiver,
 }
 
 pub fn handle_input(root: &mut Root) -> UserCommand {
@@ -21,6 +22,7 @@ pub fn handle_input(root: &mut Root) -> UserCommand {
         Key {code: KeyCode::Up    , ..} => UserCommand::Move(Direction::Up, keypress.shift),
         Key {code: KeyCode::Down  , ..} => UserCommand::Move(Direction::Down, keypress.shift),
         Key {printable: 'r'       , ..} => UserCommand::RegenMap,
+        Key {printable: 'c'       , ..} => UserCommand::CreateRiver,
         _ => handle_input(root),
     }
 }

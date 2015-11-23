@@ -5,6 +5,7 @@ use tcod::{colors, Color};
 pub enum Biome {
     // Water
     Ocean,
+    River,
     // Untraversable mountain devoid of much life
     Mountain,
     // Polar and Montane
@@ -29,6 +30,25 @@ pub enum Biome {
     FloodedGrassland,
     Wetland,
     Riparian,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum BiomeType {
+    Unspecified,
+    Water,
+    Temperate,
+    Dry,
+    Wet,
+    Tropical,
+    Polar,
+    Mountain,
+}
+
+pub enum BiomeRepresentation {
+    Standard(char, Color, Color),
+    Ocean,
+    Mountain,
+    River,
 }
 
 impl Biome {
@@ -57,51 +77,66 @@ impl Biome {
         }
     }
 
-    pub fn graphical_representation(self, height: u8) -> (char, Color, Color) {
+    pub fn graphical_representation(self) -> BiomeRepresentation {
+        
         match self {
             // Water
-            Biome::Ocean => (' ', colors::WHITE, Color::new(0,0, ((height as f32 - 25.0) * 2.0) as u8)),
+            Biome::Ocean => BiomeRepresentation::Ocean,
+            Biome::River => BiomeRepresentation::River,
+            
             // Polar and Montane
-            Biome::Arctic  => (' ', colors::LIGHTEST_BLUE, colors::LIGHTEST_CYAN),
-            Biome::Tundra  => ('~', colors::LIGHTEST_BLUE, colors::LIGHT_CYAN),
-            Biome::Taiga   => ('|', colors::DESATURATED_CHARTREUSE, colors::LIGHT_CYAN),
-            Biome::Montane => ('^', colors::LIGHTER_GREEN, colors::GREY),
+            Biome::Arctic  =>
+                BiomeRepresentation::Standard(' ', colors::LIGHTEST_BLUE, colors::LIGHTEST_CYAN),
+            Biome::Tundra  =>
+                BiomeRepresentation::Standard('~', colors::LIGHTEST_BLUE, colors::LIGHT_CYAN),
+            Biome::Taiga   =>
+                BiomeRepresentation::Standard('|', colors::DESATURATED_CHARTREUSE, colors::LIGHT_CYAN),
+            Biome::Montane =>
+                BiomeRepresentation::Standard('^', colors::LIGHTER_GREEN, colors::GREY),
 
             // Temperate
             Biome::TemperateConiferousForest =>
-                ('Y', colors::DARKER_GREEN, colors::DARK_CHARTREUSE),
+                BiomeRepresentation::Standard('Y', colors::DARKER_GREEN, colors::DARK_CHARTREUSE),
             Biome::TemperateGrassland =>
-                (',', colors::DARK_CHARTREUSE, colors::CHARTREUSE),
+                BiomeRepresentation::Standard(',', colors::DARK_CHARTREUSE, colors::CHARTREUSE),
             Biome::TemperateBroadleafForest =>
-                ('%', colors::DARK_GREEN, colors::CHARTREUSE),
+                BiomeRepresentation::Standard('%', colors::DARK_GREEN, colors::CHARTREUSE),
 
             // Tropical
             Biome::TropicalConiferousForest =>
-                ('Y', colors::LIGHT_GREEN, colors::DESATURATED_GREEN),
+                BiomeRepresentation::Standard('Y', colors::LIGHT_GREEN, colors::DESATURATED_GREEN),
             Biome::TropicalDryBroadleafForest =>
-                ('%', colors::DESATURATED_GREEN, colors::AMBER),
+                BiomeRepresentation::Standard('%', colors::DESATURATED_GREEN, colors::AMBER),
             Biome::TropicalMoistBroadleafForest =>
-                ('%', colors::DESATURATED_CHARTREUSE, colors::DARK_CHARTREUSE),
+                BiomeRepresentation::Standard('%', colors::DESATURATED_CHARTREUSE, colors::DARK_CHARTREUSE),
             Biome::TropicalGrassland =>
-                (',', colors::DARK_LIME, colors::LIGHT_YELLOW),
+                BiomeRepresentation::Standard(',', colors::DARK_LIME, colors::LIGHT_YELLOW),
             
             // Untraversable mountain
-            Biome::Mountain => {
-                let brightness = 50 + (height - 150) * 4;
-                let color = Color::new(brightness, brightness, brightness);
-                ('^', color, colors::DARK_GREY)
-            },
-
+            Biome::Mountain => BiomeRepresentation::Mountain,
+            
             // Dry
-            Biome::Desert => ('.', colors::DARK_YELLOW, colors::LIGHTER_YELLOW),
-            Biome::XericShrubland => ('&', colors::DARK_YELLOW, colors::LIGHT_YELLOW),
-            Biome::Woodlands => ('1', colors::DARKER_AMBER, colors::LIGHT_AMBER),
+            Biome::Desert         =>
+                BiomeRepresentation::Standard('.', colors::DARK_YELLOW, colors::LIGHTER_YELLOW),
+            Biome::XericShrubland =>
+                BiomeRepresentation::Standard('&', colors::DARK_YELLOW, colors::LIGHT_YELLOW),
+            Biome::Woodlands      =>
+                BiomeRepresentation::Standard('1', colors::DARKER_AMBER, colors::LIGHT_AMBER),
 
             // Wet
-            Biome::FloodedGrassland => ('~', colors::DARK_GREEN, colors::SEA),
+            Biome::FloodedGrassland =>
+                BiomeRepresentation::Standard('~', colors::DARK_GREEN, colors::SEA),
             
             // Default
-            _ => ('?', colors::WHITE, colors::BLACK),
+            _ => BiomeRepresentation::Standard('?', colors::WHITE, colors::BLACK),
+        }
+    }
+
+    pub fn category(self) -> BiomeType {
+        match self {
+            Biome::Ocean => BiomeType::Water,
+            Biome::River => BiomeType::Water,
+            _ => BiomeType::Unspecified,
         }
     }
 

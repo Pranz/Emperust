@@ -5,7 +5,7 @@ use tcod::colors;
 use itertools::Product;
 use std::sync::mpsc::Receiver;
 
-use biome::Biome;
+use biome::{Biome, BiomeRepresentation};
 use game::{Game, ProgressInfo};
 use map::Tile;
 
@@ -30,7 +30,7 @@ pub fn render_map_zoomed_in(game: &mut Game) {
         for y in (0..con.height()) {
             let tile = map.get_tile(x as usize + game.camera.x as usize,
                                     y as usize + game.camera.y as usize);
-            let (character, fg, bg) = tile.graphical_representation();
+            let (character, fg, bg) = tile.graphical_representation(map);
             con.put_char_ex(x, y, character, fg, bg);
         }
     }
@@ -47,16 +47,16 @@ pub fn render_map_zoomed_out(game: &mut Game) {
 
     for (x,y) in Product::new((0..con.width()), (0..con.height())) {
         let biome = map.get_biome(x as usize, y as usize);
-        let (character, fg ,bg) = match biome {
-            Biome::Ocean => biome.graphical_representation(100),
-            Biome::Mountain => biome.graphical_representation(180),
-            _ => biome.graphical_representation(0),
+        let (character, fg ,bg) = match biome.graphical_representation() {
+            BiomeRepresentation::Ocean => (' ', colors::WHITE, colors::DARK_BLUE),
+            BiomeRepresentation::Mountain => ('^', colors::LIGHT_GREY, colors::DARK_GREY),
+            BiomeRepresentation::Standard(chr, fg, bg) => (chr, fg, bg),
+            BiomeRepresentation::River => (' ', colors::WHITE, colors::DARK_BLUE),
         };
         con.put_char_ex(x, y, character, fg, bg);
     }
 
     con.put_char(cursor.x, cursor.y, '@', BackgroundFlag::None);
-
 }
 
 pub fn render_debug_info(game: &mut Game) {
