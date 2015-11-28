@@ -131,13 +131,14 @@ impl Map {
         let random_points = sample(
             &mut thread_rng(),
             iproduct!(0..self.width, 0..self.height),
-            amount);
+            amount * 10);
         random_points.into_iter().map(|(x,y)| {
             let (highest_x, highest_y) = iproduct!(0..10, 0..10)
                 .map(|(offset_x, offset_y)|
                      (x + offset_x, y + offset_y))
                 .filter(|&(xx, yy)|
                         self.in_bounds(xx,yy))
+                .take(amount)
                 .max_by(|&(xx, yy)|
                         self.get_height(xx,yy))
                 .unwrap();
@@ -156,7 +157,7 @@ impl Map {
         let (mut x, mut y) = (x_orig as isize, y_orig as isize);
         let mut rng = thread_rng();
         
-        while nodes.len() < 35 {
+        while nodes.len() < 200 {
             let potential_nodes : Vec<(isize, isize)> =
                 vec![(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
                 .into_iter()
@@ -164,7 +165,7 @@ impl Map {
                     let (xx,yy) = t;
                     self.in_bounds_isize(xx as isize,yy as isize) &&
                         self.get_height(xx as usize, yy as usize) <
-                        (self.get_height(x as usize, y as usize) + 6) &&
+                        (self.get_height(x as usize, y as usize) + 2) &&
                         self.neighbour_positions(xx as usize, yy as usize)
                         .into_iter()
                         .filter(|&t|
@@ -255,14 +256,14 @@ pub fn get_height_map(settings: &Settings) -> Box<Fn(usize, usize) -> u8> {
                                   settings.height_map_coefficient);
     let turbulence = get_noise_map(settings.height_map_lacunarity,
                                    settings.height_map_hurst,
-                                   settings.height_map_coefficient * 6.0);
+                                   settings.height_map_coefficient * 9.0);
     let map_width = settings.map_width;
     let map_height = settings.map_height;
     let distance_map = get_distance_map(map_width as f32, map_height as f32);
     
-    let height_map = combine_scalar_fields(vec![(noise_gen, 0.65),
-                                                (turbulence, 0.15),
-                                                (distance_map, 0.2)]);
+    let height_map = combine_scalar_fields(vec![(noise_gen, 0.75),
+                                                (turbulence, 0.25),
+                                                (distance_map, 0.0)]);
     Box::new(move |x: usize, y: usize| {
         let (x, y) = (x as f32, y as f32);
         (height_map(x,y) * 255.0) as u8

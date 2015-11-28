@@ -13,14 +13,14 @@ map:
     width: 1000
     height: 1000
 height_map:
-    coefficient: 0.015
+    coefficient: 0.008
     lacunarity: 8.0
     hurst: 16.0
 temperature:
     y_dependence: 0.3
     turbulence: 6.0
-    turbulence_dependence: 0.3
-    coefficient: 0.025
+    turbulence_dependence: 0.2
+    coefficient: 0.015
 rainfall:
     coefficient: 0.05
     height_dependence: 0.4
@@ -29,7 +29,7 @@ rainfall:
 world_gen:
     tree_line: 167
     ocean_line: 140
-    rivers: 200
+    rivers: 75
 debug_window:
     width: 50
     height: 50

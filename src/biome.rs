@@ -1,5 +1,5 @@
 
-use tcod::{colors, Color};
+use tcod::{colors, Color, chars};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Biome {
@@ -57,21 +57,21 @@ impl Biome {
             x if x < ocean_line => Biome::Ocean,
             x if x >= tree_line => if x > 172 { Biome::Mountain } else { Biome::Montane },
             _ => match (temperature, rainfall) {
-                (t, rf) if t > 160 && rf < 105 => Biome::Desert,
-                (t, rf) if t > 160 && rf < 122 => Biome::XericShrubland,
-                (t, rf) if t > 160 && rf < 135 => Biome::Woodlands,
-                (t, _ ) if t < 70              => Biome::Arctic,
-                (t, rf) if t < 90  && rf < 130 => Biome::Tundra,
-                (t, rf) if t < 90              => Biome::Taiga,
-                (t, rf) if t < 141 && rf < 130 => Biome::TemperateGrassland,
+                (t, rf) if t > 160 && rf < 111 => Biome::Desert,
+                (t, rf) if t > 160 && rf < 118 => Biome::XericShrubland,
+                (t, rf) if t > 170 && rf < 124  => Biome::TropicalDryBroadleafForest,
+                (t, rf) if t > 160 && rf < 126 => Biome::TropicalGrassland,
+                (t, rf) if t > 160 && rf < 136 => Biome::Woodlands,
+                (t, _ ) if t < 100             => Biome::Arctic,
+                (t, rf) if t < 120  && rf < 130=> Biome::Tundra,
+                (t, rf) if t < 135             => Biome::Taiga,
+                (t, rf) if t < 161 && rf < 140 => Biome::TemperateGrassland,
                 (t, rf) if t < 151 && rf < 150 => Biome::TemperateConiferousForest,
                 (t ,rf) if t < 161 && rf < 165 => Biome::TemperateBroadleafForest,
-                (t ,rf) if rf > 210            => Biome::Wetland,
+                (t ,rf) if rf > 168            => Biome::Wetland,
                 (t, rf) if rf > 164            => Biome::FloodedGrassland,
-                (t, rf) if t > 170 && rf > 150 => Biome::TropicalMoistBroadleafForest,
-                (t, rf) if t > 170 && rf > 69  => Biome::TropicalDryBroadleafForest,
-                (t, rf) if t > 160 && rf > 140 => Biome::TropicalConiferousForest,
-                (t, rf) if t > 160 && rf > 129 => Biome::TropicalGrassland,
+                (t, rf) if t > 167 && rf > 135 => Biome::TropicalMoistBroadleafForest,
+                (t, rf) if t > 160 && rf > 135 => Biome::TropicalConiferousForest,
                 _ => Biome::Arctic
             }
         }
@@ -90,7 +90,7 @@ impl Biome {
             Biome::Tundra  =>
                 BiomeRepresentation::Standard('~', colors::LIGHTEST_BLUE, colors::LIGHT_CYAN),
             Biome::Taiga   =>
-                BiomeRepresentation::Standard('|', colors::DESATURATED_CHARTREUSE, colors::LIGHT_CYAN),
+                BiomeRepresentation::Standard('Y', colors::DARK_CHARTREUSE, colors::DESATURATED_GREEN),
             Biome::Montane =>
                 BiomeRepresentation::Standard('^', colors::LIGHTER_GREEN, colors::GREY),
 
@@ -100,11 +100,11 @@ impl Biome {
             Biome::TemperateGrassland =>
                 BiomeRepresentation::Standard(',', colors::DARK_CHARTREUSE, colors::CHARTREUSE),
             Biome::TemperateBroadleafForest =>
-                BiomeRepresentation::Standard('%', colors::DARK_GREEN, colors::CHARTREUSE),
+                BiomeRepresentation::Standard('%', colors::DARK_GREEN, colors::DESATURATED_CHARTREUSE),
 
             // Tropical
             Biome::TropicalConiferousForest =>
-                BiomeRepresentation::Standard('Y', colors::LIGHT_GREEN, colors::DESATURATED_GREEN),
+                BiomeRepresentation::Standard('Y', colors::LIGHT_AMBER, colors::DARKER_GREEN),
             Biome::TropicalDryBroadleafForest =>
                 BiomeRepresentation::Standard('%', colors::DESATURATED_GREEN, colors::AMBER),
             Biome::TropicalMoistBroadleafForest =>
@@ -121,11 +121,13 @@ impl Biome {
             Biome::XericShrubland =>
                 BiomeRepresentation::Standard('&', colors::DARK_YELLOW, colors::LIGHT_YELLOW),
             Biome::Woodlands      =>
-                BiomeRepresentation::Standard('1', colors::DARKER_AMBER, colors::LIGHT_AMBER),
+                BiomeRepresentation::Standard(chars::ARROW_N, colors::DARKER_AMBER, colors::LIGHT_AMBER),
 
             // Wet
             Biome::FloodedGrassland =>
                 BiomeRepresentation::Standard('~', colors::DARK_GREEN, colors::SEA),
+            Biome::Wetland =>
+                BiomeRepresentation::Standard('~', colors::SEA, colors::DARK_SEA),
             
             // Default
             _ => BiomeRepresentation::Standard('?', colors::WHITE, colors::BLACK),
