@@ -32,6 +32,10 @@ pub fn render_map_zoomed_in(game: &mut Game) {
                                     y as usize + game.camera.y as usize);
             let (character, fg, bg) = tile.graphical_representation(map);
             con.put_char_ex(x, y, character, fg, bg);
+            if game.cities.contains(&(x as usize + game.camera.x as usize
+                                      , y as usize + game.camera.y as usize)) {
+                con.put_char_ex(x, y, 'C', colors::LIGHTER_FLAME, colors::DARKER_GREY);
+            }
         }
     }
 

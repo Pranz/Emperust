@@ -6,6 +6,7 @@ use tcod::{Color, colors, chars};
 use num::pow;
 use itertools::Product;
 use std::sync::mpsc::Sender;
+use std::ops::Range;
 use rand::{thread_rng, sample};
 
 use point::Point;
@@ -204,6 +205,10 @@ impl Map {
 
     pub fn in_bounds(&self, x: usize, y: usize) -> bool {
         x < self.width && y < self.height
+    }
+
+    pub fn get_coordinate_iter(&self) -> Product<Range<usize>, Range<usize>> {
+        Product::new(0..self.width, 0..self.height)
     }
 
     pub fn neighbour_positions(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
