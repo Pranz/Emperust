@@ -93,7 +93,7 @@ impl Map {
                height: usize,
                ocean_line: u8,
                tree_line: u8,
-               rivers: usize,
+               rivers: u16,
                height_map: DiscreteField,
                temperature_map: DiscreteField,
                rainfall_map: Box<Fn(usize, usize, u8) -> u8>,
@@ -123,28 +123,36 @@ impl Map {
             width: width,
             height: height,
         };
-        map.create_rivers(rivers);
+        println!("Created {} rivers", map.create_rivers(rivers).into_iter()
+               .filter(|ref vec| vec.len() != 0)
+               .count());
         map
     }
 
-    pub fn create_rivers(&mut self, amount: usize) -> Vec<Vec<(usize, usize)>> {
+    pub fn create_rivers(&mut self, amount: u16) -> Vec<Vec<(usize, usize)>> {
         let random_points = sample(
             &mut thread_rng(),
             iproduct!(0..self.width, 0..self.height),
-            amount * 10);
-        random_points.into_iter().map(|(x,y)| {
-            let (highest_x, highest_y) = iproduct!(0..10, 0..10)
-                .map(|(offset_x, offset_y)|
-                     (x + offset_x, y + offset_y))
-                .filter(|&(xx, yy)|
-                        self.in_bounds(xx,yy))
-                .take(amount)
-                .max_by(|&(xx, yy)|
-                        self.get_height(xx,yy))
-                .unwrap();
-            
-            self.create_river(highest_x, highest_y)
-        }).collect()
+            amount as usize * 30);
+        let start_nodes: Vec<(usize, usize)> = random_points
+            .into_iter()
+            .filter(|&(x,y)| self.get_biome(x,y).category() != BiomeType::Water)
+            .take(amount as usize)
+            .map(|(x,y)| {
+                iproduct!(0..10, 0..10)
+                    .map(|(offset_x, offset_y)|
+                         (x + offset_x, y + offset_y))
+                    .filter(|&(xx, yy)|
+                            self.in_bounds(xx,yy))
+                    .max_by(|&(xx, yy)|
+                            self.get_height(xx,yy))
+                    .unwrap()
+            })
+            .collect();
+        start_nodes
+            .into_iter()
+            .map(|(x,y)| self.create_river(x ,y))
+            .collect()
     }
 
     pub fn create_river(&mut self, x_orig: usize, y_orig: usize) -> Vec<(usize, usize)> {
@@ -183,11 +191,13 @@ impl Map {
             { return nodes; }
 
             let random_node = sample(&mut rng, potential_nodes.iter(), 1)[0];
-            
+
             x = random_node.0 as isize;
             y = random_node.1 as isize;
+            
             self.set_biome(x as usize, y as usize, Biome::River);
             nodes.push((x as usize, y as usize));
+
         }
         nodes
     }
@@ -238,6 +248,10 @@ impl Map {
 
     pub fn set_biome(&mut self, x: usize, y: usize, biome: Biome) {
         self.biome_map[x * self.height + y] = biome;
+    }
+
+    pub fn set_height(&mut self, x: usize, y: usize, height: u8) {
+        self.height_map[x * self.height + y] = height;
     }
 }
 

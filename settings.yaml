@@ -29,7 +29,9 @@ rainfall:
 world_gen:
     tree_line: 167
     ocean_line: 140
-    rivers: 75
+    rivers: 200
+history_gen:
+    initial_cities: 50
 debug_window:
     width: 50
     height: 50

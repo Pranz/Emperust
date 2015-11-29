@@ -31,7 +31,8 @@ pub struct Settings {
     pub rainfall_height_dependence: f32,
     pub rainfall_turbulence: f32,
     pub rainfall_turbulence_dependence: f32,
-    pub river_amount: usize,
+    pub river_amount: u16,
+    pub initial_cities: u16,
 }
 
 impl Settings {
@@ -87,7 +88,9 @@ impl Settings {
             rainfall_coefficient: doc["rainfall"]["coefficient"]
                 .as_f64().unwrap() as f32,
             river_amount: doc["world_gen"]["rivers"]
-                .as_i64().unwrap() as usize,
+                .as_i64().unwrap() as u16,
+            initial_cities: doc["history_gen"]["initial_cities"]
+                .as_i64().unwrap() as u16,
         })
     }
 }

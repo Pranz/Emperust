@@ -59,9 +59,9 @@ impl Biome {
             _ => match (temperature, rainfall) {
                 (t, rf) if t > 160 && rf < 111 => Biome::Desert,
                 (t, rf) if t > 160 && rf < 118 => Biome::XericShrubland,
-                (t, rf) if t > 170 && rf < 124  => Biome::TropicalDryBroadleafForest,
+                (t, rf) if t > 165 && rf < 130 => Biome::TropicalDryBroadleafForest,
                 (t, rf) if t > 160 && rf < 126 => Biome::TropicalGrassland,
-                (t, rf) if t > 160 && rf < 136 => Biome::Woodlands,
+                (t, rf) if t > 155 && rf < 136 => Biome::Woodlands,
                 (t, _ ) if t < 100             => Biome::Arctic,
                 (t, rf) if t < 120  && rf < 130=> Biome::Tundra,
                 (t, rf) if t < 135             => Biome::Taiga,
