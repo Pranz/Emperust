@@ -8,8 +8,14 @@ pub struct Point<T> {
 }
 
 impl<T> Point<T> {
+    #[inline(always)]
     pub fn new(x: T, y: T) -> Point<T>{
         Point {x: x, y: y}
+    }
+
+    #[inline(always)]
+    pub fn from_tuple(t: (T, T)) -> Point<T> {
+        Point {x: t.0, y: t.1}
     }
     
     #[inline(always)]

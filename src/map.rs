@@ -131,42 +131,48 @@ impl Map {
     }
 
     pub fn create_rivers(&mut self, amount: u16) -> Vec<Vec<(usize, usize)>> {
+        let mut rivers = Vec::new();
         let random_points = sample(
             &mut thread_rng(),
             iproduct!(0..self.width, 0..self.height),
-            amount as usize * 30);
-        let start_nodes: Vec<(usize, usize)> = random_points
-            .into_iter()
-            .filter(|&(x,y)| self.get_biome(x,y).category() != BiomeType::Water)
-            .take(amount as usize)
-            .map(|(x,y)| {
-                iproduct!(0..10, 0..10)
-                    .map(|(offset_x, offset_y)|
-                         (x + offset_x, y + offset_y))
-                    .filter(|&(xx, yy)|
-                            self.in_bounds(xx,yy))
-                    .max_by(|&(xx, yy)|
-                            self.get_height(xx,yy))
-                    .unwrap()
-            })
-            .collect();
-        start_nodes
-            .into_iter()
-            .map(|(x,y)| self.create_river(x ,y))
-            .collect()
+            amount as usize * 100);
+        let mut start_nodes = random_points.into_iter();
+        let mut i: usize = 0;
+        while i < amount as usize {
+            if let Some(t) = start_nodes.next() {
+                let next_point = Point::from_tuple(t);
+                let new_river = self.create_river(next_point.x, next_point.y);
+                let river_length = new_river.len();
+                if river_length > 20 {
+                    let end_node = Point::from_tuple(new_river[river_length - 1]);
+                    if self.neighbour_positions(end_node.x, end_node.y)
+                        .into_iter()
+                        .any(|(x,y)| self.get_biome(x,y) == Biome::Ocean) {
+                            for &(x,y) in new_river.iter() {
+                                self.set_biome(x, y, Biome::River);
+                            }
+                            rivers.push(new_river);
+                            i = i + 1;
+                        }
+                }
+            }
+        }
+        return rivers;
     }
 
-    pub fn create_river(&mut self, x_orig: usize, y_orig: usize) -> Vec<(usize, usize)> {
-        if self.get_biome(x_orig,y_orig).category() == BiomeType::Water {
+    pub fn create_river(&self, x_orig: usize, y_orig: usize) -> Vec<(usize, usize)> {
+        if !self.in_bounds(x_orig, y_orig) ||
+            self.get_biome(x_orig,y_orig).category() == BiomeType::Water
+        {
             return vec![];
         }
         
         let mut nodes = vec![(x_orig, y_orig)];
-        self.set_biome(x_orig, y_orig, Biome::River);
         let (mut x, mut y) = (x_orig as isize, y_orig as isize);
         let mut rng = thread_rng();
+        let mut i: usize = 0;
         
-        while nodes.len() < 200 {
+        while i < 200 {
             let potential_nodes : Vec<(isize, isize)> =
                 vec![(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
                 .into_iter()
@@ -178,7 +184,8 @@ impl Map {
                         self.neighbour_positions(xx as usize, yy as usize)
                         .into_iter()
                         .filter(|&t|
-                                self.get_biome(t.0,t.1) == Biome::River)
+                                self.get_biome(t.0,t.1) == Biome::River
+                                || nodes.contains(&t))
                         .count() < 2
                 }).collect();
 
@@ -196,7 +203,8 @@ impl Map {
             x = random_node.0 as isize;
             y = random_node.1 as isize;
             
-            self.set_biome(x as usize, y as usize, Biome::River);
+            //self.set_biome(x as usize, y as usize, Biome::River);
+            i = i + 1;
             nodes.push((x as usize, y as usize));
 
         }
