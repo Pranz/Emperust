@@ -1,0 +1,20 @@
+
+After biome and river/lakes generation, animal populations should be placed.
+Abstractly, the population should be a mapping `(usize,usize) -> {Animal}.
+
+As `Animal` would likely be a small set, a set of animals can be represented
+with a an uint greater than it's size. If we use an array as a representation
+for the mapping, and assume the following values:
+
+    map dimensions of 1000 * 1000
+    `Animal` cardinality of 32
+
+then the whole mapping will take up 4 MB of space. There are also some neat tricks
+available for this, since river animals, land animals and sea animals will likely be
+distinct sets (river- and land animals might have some overlap), we can use the biome
+information to know from which category to pull. For example, assume the cardinality
+of `Animal` is 8, then `0x11` might mean `[Cow, Horse]` if the biome is a land biome,
+and `[Whale, Shark]` if the biome is `Ocean`.
+
+This can be used for all biomes really, but a few animals will likely be available in
+most temperate biomes so we'll see how far this can go.

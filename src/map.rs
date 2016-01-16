@@ -143,7 +143,7 @@ impl Map {
                 let next_point = Point::from_tuple(t);
                 let new_river = self.create_river(next_point.x, next_point.y);
                 let river_length = new_river.len();
-                if river_length > 20 {
+                if river_length > 40 {
                     let end_node = Point::from_tuple(new_river[river_length - 1]);
                     if self.neighbour_positions(end_node.x, end_node.y)
                         .into_iter()

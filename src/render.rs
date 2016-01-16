@@ -8,6 +8,7 @@ use std::sync::mpsc::Receiver;
 use biome::{Biome, BiomeRepresentation};
 use game::{Game, ProgressInfo};
 use map::Tile;
+use history_gen::{City, Language};
 
 pub fn render_screen(game: &mut Game, root: &mut Root) {
     root.clear();
@@ -32,7 +33,7 @@ pub fn render_map_zoomed_in(game: &mut Game) {
                                     y as usize + game.camera.y as usize);
             let (character, fg, bg) = tile.graphical_representation(map);
             con.put_char_ex(x, y, character, fg, bg);
-            if game.cities.contains(&(x as usize + game.camera.x as usize
+            if game.cities.contains_key(&(x as usize + game.camera.x as usize
                                       , y as usize + game.camera.y as usize)) {
                 con.put_char_ex(x, y, 'C', colors::LIGHTER_FLAME, colors::DARKER_GREY);
             }
@@ -68,6 +69,7 @@ pub fn render_debug_info(game: &mut Game) {
     con.clear();
 
     let tile = map.get_tile(cursor.x as usize, cursor.y as usize);
+    let mut row: u8 = 0;
     let info: [String; 6] = ["Position x: ".to_string() + &cursor.x.to_string(),
                              "Position y: ".to_string() + &cursor.y.to_string(),
                              "Height: ".to_string() + &tile.height.to_string(),
@@ -75,10 +77,25 @@ pub fn render_debug_info(game: &mut Game) {
                              "Rainfall: ".to_string() + &tile.rainfall.to_string(),
                              format!("Biome: {:?}", &tile.biome).to_string()];
 
-    for (i, text) in info.iter().enumerate() {
-        con.print(0, i as i32, text);
+    for text in info.iter() {
+        con.print(0, row as i32, text);
+        row = row + 1;
     }
 
+    if let Some(&City {
+        language: Language(language_id),
+        population: population,
+    }) = game.cities.get(&(cursor.x as usize, cursor.y as usize)) {
+        row = row + 1;
+        let info: [String; 2] = ["Language id: ".to_string() + &language_id.to_string(),
+                                 "Population: ".to_string() + &population.to_string()];
+        con.print(0, row as i32, "City info:");
+        row = row + 1;
+        for text in info.iter() {
+            con.print(4, row as i32, text);
+            row = row + 1;
+        }
+    }
 }
 
 pub fn render_progress(root: &mut Root, width: usize, rx: Receiver<ProgressInfo>){

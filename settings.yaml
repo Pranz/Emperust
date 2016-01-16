@@ -20,16 +20,16 @@ temperature:
     y_dependence: 0.3
     turbulence: 6.0
     turbulence_dependence: 0.2
-    coefficient: 0.015
+    coefficient: 0.03
 rainfall:
-    coefficient: 0.05
+    coefficient: 0.025
     height_dependence: 0.4
     turbulence: 6.0
     turbulence_dependence: 0.2
 world_gen:
     tree_line: 167
-    ocean_line: 140
-    rivers: 200
+    ocean_line: 130
+    rivers: 100
 history_gen:
     initial_cities: 50
 debug_window:

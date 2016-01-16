@@ -6,7 +6,7 @@ use input::UserCommand;
 use point::Point;
 use map::{Map, ZoomedMap, get_height_map, get_temperature_map, get_rainfall_map, zoomed_map};
 use direction::Direction;
-use history_gen::place_initial_cities;
+use history_gen::{City, place_initial_cities};
 
 use std::collections::{HashMap, HashSet};
 use std::cmp::{min, max};
@@ -20,7 +20,7 @@ pub struct Game {
     pub cursor: Point<i32>,
     pub camera: Point<i32>,
     pub settings: Settings,
-    pub cities: HashSet<(usize, usize)>,
+    pub cities: HashMap<(usize, usize), City>,
     pub map_console: Offscreen,
     pub zoomed_map_console: Offscreen,
     pub debug_console: Offscreen,
