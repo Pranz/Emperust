@@ -79,6 +79,7 @@ pub struct Map {
     pub rainfall_map: Box<Fn(usize, usize, u8) -> u8>,
     pub width: usize,
     pub height: usize,
+    pub flora_map: Vec<u8>,
 }
 
 pub struct ZoomedMap {
@@ -123,6 +124,7 @@ impl Map {
             rainfall_map: rainfall_map,
             width: width,
             height: height,
+            flora_map: Vec::new(),
         };
         println!("Created {} rivers", map.create_rivers(rivers).into_iter()
                .filter(|ref vec| vec.len() != 0)

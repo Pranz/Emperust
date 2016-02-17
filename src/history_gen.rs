@@ -32,3 +32,8 @@ pub fn place_initial_cities(settings: &Settings, map: &Map) -> HashMap<(usize, u
         .count());
     return cities;
 }
+
+pub fn generate_botanical_set_map(biome_map: &[Biome], height_map: &[u8],
+                                  width: usize, height: usize) {
+    return;
+}
