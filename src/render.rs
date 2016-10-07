@@ -5,9 +5,8 @@ use tcod::colors;
 use itertools::Product;
 use std::sync::mpsc::Receiver;
 
-use biome::{Biome, BiomeRepresentation};
+use biome::{BiomeRepresentation};
 use game::{Game, ProgressInfo};
-use map::Tile;
 use history_gen::{City, Language};
 
 pub fn render_screen(game: &mut Game, root: &mut Root) {
@@ -27,8 +26,8 @@ pub fn render_screen(game: &mut Game, root: &mut Root) {
 pub fn render_map_zoomed_in(game: &mut Game) {
     let (con, cursor, camera, map) = (&mut game.map_console, game.cursor, game.camera, &game.map);
 
-    for x in (0..con.width()) {
-        for y in (0..con.height()) {
+    for x in 0..con.width() {
+        for y in 0..con.height() {
             let tile = map.get_tile(x as usize + game.camera.x as usize,
                                     y as usize + game.camera.y as usize);
             let (character, fg, bg) = tile.graphical_representation(map);
@@ -84,7 +83,7 @@ pub fn render_debug_info(game: &mut Game) {
 
     if let Some(&City {
         language: Language(language_id),
-        population: population,
+        population,
     }) = game.cities.get(&(cursor.x as usize, cursor.y as usize)) {
         row = row + 1;
         let info: [String; 2] = ["Language id: ".to_string() + &language_id.to_string(),

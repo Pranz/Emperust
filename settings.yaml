@@ -1,19 +1,19 @@
 font_path: fonts/consolas10x10_gs_tc.png
 title: Min skit
 main_window:
-    width: 180
-    height: 100
-map_window:
     width: 100
-    height: 60
-zoomed_map_window:
+    height: 75
+map_window:
     width: 60
     height: 60
+zoomed_map_window:
+    width: 30
+    height: 30
 map:
-    width: 1000
-    height: 1000
+    width: 500
+    height: 500
 height_map:
-    coefficient: 0.008
+    coefficient: 0.006
     lacunarity: 8.0
     hurst: 16.0
 temperature:
@@ -22,16 +22,16 @@ temperature:
     turbulence_dependence: 0.2
     coefficient: 0.03
 rainfall:
-    coefficient: 0.025
-    height_dependence: 0.4
-    turbulence: 6.0
-    turbulence_dependence: 0.2
+    coefficient: 0.018
+    height_dependence: 0.7
+    turbulence: 3.0
+    turbulence_dependence: 0.1
 world_gen:
     tree_line: 167
     ocean_line: 130
-    rivers: 100
+    rivers: 5
 history_gen:
-    initial_cities: 50
+    initial_cities: 0
 debug_window:
     width: 50
     height: 50

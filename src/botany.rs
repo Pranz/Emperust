@@ -37,16 +37,16 @@ pub enum Plant {
     Coca,
     Kale,
     Broccoli,
-    
+    Oak,
 }
 
 pub fn get_plants(plant_set: u8, biome: Biome) -> Vec<Plant> {
-    match Biome {
-        Biome::
+    match biome {
+        _ => Vec::new()
     }
 }
 
-pub fn byte_to_bool_vec(byte: u8) -> [Bool; 8] {
+pub fn byte_to_bitarray(byte: u8) -> [bool; 8] {
     [(byte >> 7 & 1) == 1,
      (byte >> 6 & 1) == 1,
      (byte >> 5 & 1) == 1,
@@ -57,21 +57,23 @@ pub fn byte_to_bool_vec(byte: u8) -> [Bool; 8] {
      (byte      & 1) == 1]
 }
 
-pub fn bool_vec_to_byte(bool_vec: [Bool; 8]) -> u8 {
-    let mut position = 8;
-    bool_vec.map(|p| {
+pub fn bitarray_to_byte(bool_vec: [bool; 8]) -> u8 {
+    let mut position: u8 = 8;
+    bool_vec[..].into_iter().map(|&p| {
         position -= 1;
         if p {
-            1^position
+            1 << position
         }
         else {
             0
         }
-    }).foldr(|x,y| {x | y})
+    }).fold(0u8, |x,y| {x | y})
 }
 
 pub fn plant_position(plant: Plant, biome: Biome) -> u8 {
     match biome {
-        
+        Biome::Taiga => match plant {
+            Plant::
+        }
     }
 }

@@ -1,9 +1,5 @@
-
-
-use tcod::noise::{Noise, NoiseType};
 use tcod::{Color, colors, chars};
 
-use num::pow;
 use itertools::Product;
 use std::sync::mpsc::Sender;
 use std::ops::Range;
@@ -105,9 +101,9 @@ impl Map {
         let mut heights: Vec<u8> = Vec::new();
         let mut biomes: Vec<Biome> = Vec::new();
         
-        for x in (0..width) {
+        for x in 0..width {
             tx.as_ref().map(|s| s.send(ProgressInfo::FinishedColumn(x)));
-            for y in (0..height) {
+            for y in 0..height {
                 let height = height_map(x,y);
                 heights.push(height);
                 biomes.push(Biome::new(height, temperature_map(x,y), rainfall_map(x,y, height),
@@ -145,7 +141,7 @@ impl Map {
                 let next_point = Point::from_tuple(t);
                 let new_river = self.create_river(next_point.x, next_point.y);
                 let river_length = new_river.len();
-                if river_length > 40 {
+                if river_length > 20 {
                     let end_node = Point::from_tuple(new_river[river_length - 1]);
                     if self.neighbour_positions(end_node.x, end_node.y)
                         .into_iter()
@@ -191,7 +187,6 @@ impl Map {
                         .count() < 2
                 }).collect();
 
-            // If it is empty, returns nodes.
             // If any neighbour is water, returns nodes
             if potential_nodes.len() == 0 ||
                 potential_nodes.iter().any(|&(xx,yy)| {
@@ -339,24 +334,21 @@ pub fn get_rainfall_map(settings: &Settings) -> Box<Fn(usize, usize, u8) -> u8> 
 }
 
 pub fn zoomed_map(map: &Map, width: usize, height: usize, settings: &Settings) -> ZoomedMap {
-    let (ratioX, ratioY, remainderX, remainderY) = (map.width / width,
-                                                    map.height / height,
-                                                    map.width % width,
-                                                    map.height % height);
+    let (ratio_x, ratio_y)= (map.width / width, map.height / height);
     let mut biome_map = Vec::new();
     let (ocean_line, tree_line) = (settings.ocean_line, settings.tree_line);
     
     for (x,y) in Product::new((0..width),(0..height)) {
-        let height = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
+        let height = Product::new(((x*ratio_x)..((x+1)*ratio_x)), ((y*ratio_y)..((y+1)*ratio_y))).map(|(xx,yy)| {
             map.get_height(xx,yy)
-        }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
-        let temperature = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
+        }).fold(0, |a,b| a as u64 + b as u64) / (ratio_x as u64 * ratio_y as u64);
+        let temperature = Product::new(((x*ratio_x)..((x+1)*ratio_x)), ((y*ratio_y)..((y+1)*ratio_y))).map(|(xx,yy)| {
             (*map.temperature_map)(xx,yy)
-        }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
+        }).fold(0, |a,b| a as u64 + b as u64) / (ratio_x as u64 * ratio_y as u64);
         
-        let rainfall = Product::new(((x*ratioX)..((x+1)*ratioX)), ((y*ratioY)..((y+1)*ratioY))).map(|(xx,yy)| {
+        let rainfall = Product::new(((x*ratio_x)..((x+1)*ratio_x)), ((y*ratio_y)..((y+1)*ratio_y))).map(|(xx,yy)| {
             (*map.rainfall_map)(xx,yy, height as u8)
-        }).fold(0, |a,b| a as u64 + b as u64) / (ratioX as u64 * ratioY as u64);
+        }).fold(0, |a,b| a as u64 + b as u64) / (ratio_x as u64 * ratio_y as u64);
         
         biome_map.push(Biome::new(height as u8, temperature as u8, rainfall as u8, tree_line, ocean_line));
     }

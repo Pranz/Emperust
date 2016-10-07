@@ -5,10 +5,9 @@ use settings::Settings;
 use input::UserCommand;
 use point::Point;
 use map::{Map, ZoomedMap, get_height_map, get_temperature_map, get_rainfall_map, zoomed_map};
-use direction::Direction;
 use history_gen::{City, place_initial_cities};
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use std::cmp::{min, max};
 use std::sync::mpsc::Sender;
 

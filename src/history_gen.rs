@@ -4,7 +4,7 @@ use settings::Settings;
 use biome::{Biome, BiomeType};
 
 use rand::{sample, thread_rng};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 pub struct Language(pub usize);
 
@@ -15,7 +15,7 @@ pub struct City {
 
 pub fn place_initial_cities(settings: &Settings, map: &Map) -> HashMap<(usize, usize), City> {
     let mut cities = HashMap::new();
-    let mut id_gen = (0..100000);
+    let mut id_gen = 0..100000;
     let valid_city_locations = map.get_coordinate_iter()
         .filter(|&(x,y)| map.get_biome(x,y).category() != BiomeType::Water &&
                 map.get_biome(x,y) == Biome::Woodlands &&

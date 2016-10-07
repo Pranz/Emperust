@@ -1,5 +1,5 @@
 [root]
-name = "emperust2"
+name = "emperust"
 version = "0.1.0"
 dependencies = [
  "itertools 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
