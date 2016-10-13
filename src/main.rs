@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-//#![feature(iter_cmp)]
 
 extern crate emperust;
 extern crate tcod;
@@ -20,7 +19,7 @@ use emperust::render::{render_screen, render_progress};
 
 fn main() {
     let settings = Settings::read("settings.yaml").unwrap();
-    
+
     let mut root = Root::initializer()
         .font(&settings.font_path, FontLayout::Tcod)
         .font_type(FontType::Greyscale)
@@ -36,7 +35,7 @@ fn main() {
         render_progress(&mut root, width , rx);
         return root;
     });
-    
+
     let mut game = Game::new(settings, tx);
     let mut root = t.join().unwrap();
 
@@ -44,7 +43,7 @@ fn main() {
     let mut y: i32 = 0;
     while !root.window_closed() {
         render_screen(&mut game, &mut root);
-        
+
         let command = handle_input(&mut root);
         if command == UserCommand::Exit {
             return;
@@ -54,7 +53,7 @@ fn main() {
             y = game.cursor.y;
             break;
         }
-        
+
         else {
             game.execute_command(command);
         }

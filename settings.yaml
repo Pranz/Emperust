@@ -1,17 +1,17 @@
 font_path: fonts/consolas10x10_gs_tc.png
 title: Min skit
 main_window:
-    width: 100
-    height: 75
+    width: 160
+    height: 100
 map_window:
-    width: 60
-    height: 60
+    width: 100
+    height: 90
 zoomed_map_window:
-    width: 30
-    height: 30
+    width: 50
+    height: 50
 map:
-    width: 500
-    height: 500
+    width: 1000
+    height: 1000
 height_map:
     coefficient: 0.006
     lacunarity: 8.0
@@ -29,7 +29,7 @@ rainfall:
 world_gen:
     tree_line: 167
     ocean_line: 130
-    rivers: 5
+    rivers: 50
 history_gen:
     initial_cities: 0
 debug_window:

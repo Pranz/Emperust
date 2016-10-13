@@ -73,7 +73,8 @@ pub fn bitarray_to_byte(bool_vec: [bool; 8]) -> u8 {
 pub fn plant_position(plant: Plant, biome: Biome) -> u8 {
     match biome {
         Biome::Taiga => match plant {
-            Plant::
-        }
+            _ => 0
+        },
+        _ => 0,
     }
 }
